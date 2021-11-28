@@ -48,6 +48,16 @@ VIRTUAL_HEIGHT = 243
 PADDLE_SPEED = 200
 
 --[[
+    Main menu drawing code.
+]]
+function main_menu()
+  love.graphics.setFont(smallFont)
+  love.graphics.printf('Main Menu', 0, 10, VIRTUAL_WIDTH, 'center')
+  love.graphics.printf('(v) - Player vs Player', 0, 20, VIRTUAL_WIDTH, 'center')
+  love.graphics.printf('(a) - Player 2 vs AI', 0, 30, VIRTUAL_WIDTH, 'center')
+end
+
+--[[
     Runs when the game first starts up, only once; used to initialize the game.
 ]]
 function love.load()
@@ -99,7 +109,10 @@ function love.load()
     player2 = Paddle(VIRTUAL_WIDTH - 15, VIRTUAL_HEIGHT - 30, 5, 20)
     ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
 
-    gameState = 'start'
+    -- gameState = 'start'
+    -- by default, the game mode is player1 vs player2
+    gameMode = 'vs'
+    gameState = 'menu'
 end
 
 --[[
@@ -202,31 +215,33 @@ function love.update(dt)
         end
     end
 
-    -- player 1 movement
-    -- if love.keyboard.isDown('w') then
-        -- player1.dy = -PADDLE_SPEED
-    -- elseif love.keyboard.isDown('s') then
-        -- player1.dy = PADDLE_SPEED
-    -- else
-        -- player1.dy = 0
-    -- end
-
-if gameState == 'play' then
-      if ball.y < (player1.y * love.math.random(1.5)) then
-        player1.dy = -PADDLE_SPEED
+    if gameMode == 'vs' then
+      -- player 1 movement
+      if love.keyboard.isDown('w') then
+         player1.dy = -PADDLE_SPEED
+      elseif love.keyboard.isDown('s') then
+         player1.dy = PADDLE_SPEED
       else
-        player1.dy = PADDLE_SPEED
+         player1.dy = 0
+      end
+    else
+      -- player 1 is AI-controlled
+      if gameState == 'play' then 
+        if ball.y < (player1.y * love.math.random(1.5)) then
+          player1.dy = -PADDLE_SPEED
+        else
+          player1.dy = PADDLE_SPEED 
+        end
       end
     end
 
-
     -- player 2 movement
     if love.keyboard.isDown('up') then
-        player2.dy = -PADDLE_SPEED
+       player2.dy = -PADDLE_SPEED
     elseif love.keyboard.isDown('down') then
-        player2.dy = PADDLE_SPEED
+       player2.dy = PADDLE_SPEED
     else
-        player2.dy = 0
+       player2.dy = 0
     end
 
     -- update our ball based on its DX and DY only if we're in play state;
@@ -235,12 +250,21 @@ if gameState == 'play' then
         ball:update(dt)
     end
 
-	-- the AI Paddle only needs to be updated when the game is in the play state:
-	if gameState == 'play' then	
-		player1:update(dt)
-	end 
-
+    if ((gameMode == 'ai') and (gameState == 'play')) or (gameMode == 'vs' ) then 
+      player1:update(dt)
+    end
     player2:update(dt)
+end
+
+--[[
+  Handle menu selection
+]]
+function menu_select(key)
+  if key == 'a' then
+    gameMode = 'ai'
+  elseif key == 'v' then
+    gameMode = 'vs'
+  end
 end
 
 --[[
@@ -249,7 +273,11 @@ end
 ]]
 function love.keypressed(key)
 
-    if key == 'escape' then
+    -- first, handle main menu
+    if ((key == 'a') or (key == 'v')) and (gameState == 'menu') then
+      menu_select(key)
+      gameState = 'start'
+    elseif key == 'escape' then
         love.event.quit()
     -- if we press enter during either the start or serve phase, it should
     -- transition to the next appropriate state
@@ -313,6 +341,8 @@ function love.draw()
             0, 10, VIRTUAL_WIDTH, 'center')
         love.graphics.setFont(smallFont)
         love.graphics.printf('Press Enter to restart!', 0, 30, VIRTUAL_WIDTH, 'center')
+    elseif gameState == 'menu' then
+      main_menu()
     end
 
     player1:render()
@@ -335,9 +365,28 @@ function displayFPS()
 end
 
 --[[
+    Color the background depending on the score.
+]]
+function colorScore()
+  score = math.max(player1Score, player2Score);
+  if (score > 6) and (score < 9) then
+    -- score between 7 and 9 will be dark orange
+    love.graphics.clear(0, 0, 255, 255/255)
+  elseif score > 8 then
+    -- score 9 and 10 will be red
+    love.graphics.clear(255, 0, 0, 255/255)
+  else
+    -- any other score will be default color
+    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+  end
+end
+
+--[[
     Simply draws the score to the screen.
 ]]
 function displayScore()
+    -- color background depending on the score
+    colorScore()
     -- draw score on the left and right center of the screen
     -- need to switch font to draw before actually printing
     love.graphics.setFont(scoreFont)
