@@ -47,6 +47,20 @@ VIRTUAL_HEIGHT = 243
 -- speed at which we will move our paddle; multiplied by dt in update
 PADDLE_SPEED = 200
 
+-- font selection
+DEFAULT_FONT_NAME = 'font.ttf'
+PDARK_FONT_NAME = 'pdark.ttf'
+ARCADE_FONT_NAME = 'arcade.ttf'
+NASA_FONT_NAME = 'nasa.otf'
+
+
+--[[
+    Return font selection.
+]]
+function get_font_name()
+  return ARCADE_FONT_NAME
+end
+
 --[[
     Main menu drawing code.
 ]]
@@ -75,9 +89,10 @@ function love.load()
     math.randomseed(os.time())
 
     -- initialize our nice-looking retro text fonts
-    smallFont = love.graphics.newFont('font.ttf', 8)
-    largeFont = love.graphics.newFont('font.ttf', 16)
-    scoreFont = love.graphics.newFont('font.ttf', 32)
+    fontName  = get_font_name()
+    smallFont = love.graphics.newFont(fontName, 8)
+    largeFont = love.graphics.newFont(fontName, 16)
+    scoreFont = love.graphics.newFont(fontName, 32)
     love.graphics.setFont(smallFont)
 
     -- set up our sound effects; later, we can just index this table and
