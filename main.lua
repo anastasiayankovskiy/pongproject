@@ -384,9 +384,15 @@ end
 ]]
 function colorScore()
   score = math.max(player1Score, player2Score);
-  if (score > 6) and (score < 9) then
+  if (score > 1) and (score < 3) then 
+    love.graphics.clear(76/255, 0, 153/255)
+  elseif (score > 2) and (score < 5) then
+    love.graphics.clear(0, 204/255, 204/255, 255/255)
+  elseif (score > 4) and (score < 7) then
+    love.graphics.clear(0, 153/255, 0, 255/255)
+  elseif (score > 6) and (score < 9) then
     -- score between 7 and 9 will be dark orange
-    love.graphics.clear(0, 0, 255, 255/255)
+    love.graphics.clear(255, 128/225, 0, 255/255)
   elseif score > 8 then
     -- score 9 and 10 will be red
     love.graphics.clear(255, 0, 0, 255/255)
